@@ -1,0 +1,129 @@
+@extends('admin.layouts.main')
+
+@section('title', $title)
+
+@section('content')
+<main class="main-content">
+    <div class="section-header">
+        <h1 class="section-title">{{ $title }}</h1>
+        <p class="section-subtitle">{{ $description }}</p>
+    </div>
+
+    <div class="card" style="max-width: 800px;">
+        <form action="{{ $url }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            @if(isset($product))
+                @method('PUT')
+            @endif
+            
+            <div class="form-group">
+                <label for="category_id" class="form-label">Category</label>
+                <select name="category_id" id="category_id" class="form-control" required>
+                    <option value="">Select Category</option>
+                    @foreach($categories as $category)
+                        <option value="{{ $category->id }}" {{ old('category_id', $product->category_id ?? '') == $category->id ? 'selected' : '' }}>
+                            {{ $category->name }}
+                        </option>
+                    @endforeach
+                </select>
+                @error('category_id')
+                    <p class="error-message">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div class="form-group">
+                <label for="name" class="form-label">Product Name</label>
+                <input type="text" name="name" id="name" class="form-control" value="{{ old('name', $product->name ?? '') }}" placeholder="Product Name" required>
+                @error('name')
+                    <p class="error-message">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div class="form-group">
+                <label for="slug" class="form-label">Slug</label>
+                <input type="text" name="slug" id="slug" class="form-control" value="{{ old('slug', $product->slug ?? '') }}" placeholder="Slug" required>
+                @error('slug')
+                    <p class="error-message">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div class="form-group">
+                <label for="price" class="form-label">Price</label>
+                <input type="number" step="0.01" name="price" id="price" class="form-control" value="{{ old('price', $product->price ?? '') }}" placeholder="0.00" required>
+                @error('price')
+                    <p class="error-message">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div class="form-group">
+                <label for="image" class="form-label">Product Image</label>
+                @if(isset($product) && $product->image)
+                    <div style="margin-bottom: 10px;">
+                        <img src="{{ asset($product->image) }}" alt="Current Image" style="height: 60px; border-radius: 4px;">
+                    </div>
+                @endif
+                <input type="file" name="image" id="image" class="form-control" accept="image/*" {{ isset($product) ? '' : 'required' }}>
+                @if(isset($product))
+                    <small style="color: var(--text-gray);">Leave blank to keep current image</small>
+                @endif
+                @error('image')
+                    <p class="error-message">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div class="form-group">
+                <label for="description" class="form-label">Description</label>
+                <textarea name="description" id="description" class="form-control" rows="4" placeholder="Product description">{{ old('description', $product->description ?? '') }}</textarea>
+                @error('description')
+                    <p class="error-message">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div class="form-group">
+                <label for="status" class="form-label">Status</label>
+                <select name="status" id="status" class="form-control">
+                    <option value="1" {{ old('status', $product->status ?? '') == '1' ? 'selected' : '' }}>Active</option>
+                    <option value="0" {{ old('status', $product->status ?? '') == '0' ? 'selected' : '' }}>Inactive</option>
+                </select>
+                @error('status')
+                    <p class="error-message">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div class="form-actions">
+                <a href="{{ route('admin.products.index') }}" class="btn-secondary">Cancel</a>
+                <button type="submit" class="btn-primary">{{ isset($product) ? 'Update Product' : 'Create Product' }}</button>
+            </div>
+        </form>
+    </div>
+</main>
+@endsection
+
+@section('scripts')
+<script>
+    const nameInput = document.getElementById('name');
+    const slugInput = document.getElementById('slug');
+
+    nameInput.addEventListener('keyup', function() {
+        if (!slugInput.value || slugInput.value === generateSlug(this.value.slice(0, -1))) {
+             slugInput.value = generateSlug(this.value);
+        }
+    });
+
+    // Also update when slug is empty
+    nameInput.addEventListener('change', function() {
+         if(!slugInput.value) {
+             slugInput.value = generateSlug(this.value);
+         }
+    });
+
+    function generateSlug(text) {
+        return text.toString().toLowerCase()
+            .replace(/\s+/g, '-')           // Replace spaces with -
+            .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
+            .replace(/\-\-+/g, '-')         // Replace multiple - with single -
+            .replace(/^-+/, '')             // Trim - from start of text
+            .replace(/-+$/, '');            // Trim - from end of text
+    }
+</script>
+@endsection
