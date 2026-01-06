@@ -9,7 +9,7 @@
         <p class="section-subtitle">{{ $description }}</p>
     </div>
 
-    <div class="card" style="max-width: 800px;">
+    <div class="card">
         <form action="{{ $url }}" method="POST">
             @csrf
             @if(isset($category))
@@ -40,12 +40,11 @@
                 @error('status')
                     <p class="error-message">{{ $message }}</p>
                 @enderror
-            </div>
 
-            <div class="form-actions">
-                <a href="{{ route('admin.category.index') }}" class="btn-secondary">Cancel</a>
-                <button type="submit" class="btn-primary">{{ isset($category) ? 'Update Category' : 'Create Category' }}</button>
-            </div>
+                <div class="form-actions">
+                    <a href="{{ route('admin.category.index') }}" class="btn-secondary">Cancel</a>
+                    <button type="submit" class="btn-primary">{{ isset($category) ? 'Update Category' : 'Create Category' }}</button>
+                </div>
         </form>
     </div>
 </main>
